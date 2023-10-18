@@ -1,7 +1,10 @@
 const router = require('express').Router();
-const { PostData, GetOneData, PutData, DeleteData, GetData } = require('../Controllers/admin-controller');
+const { Register,Login, GetOneData, PutData, DeleteData, GetData } = require('../Controllers/admin-controller');
+const {verifyAdminToken} = require('../Functions/verify-admin');
 
-router.route("/").get(GetData).post(PostData);
-router.route("/:id").get(GetOneData).put(PutData).delete(DeleteData);
+router.route("/").get(verifyAdminToken,GetData);
+router.route("/register").post(Register);
+router.route("/login").post(Login);
+router.route("/:id").all(verifyAdminToken).get(GetOneData).put(PutData).delete(DeleteData);
 
 module.exports = router;
