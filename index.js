@@ -1,9 +1,14 @@
 const express = require('express');
 const DBconnect = require('./config/config');
+const cors = require('cors');
 const app = express();
 
 DBconnect();
 app.use(express.json());
+app.use(cors());
+
+app.use('/uploads', express.static('uploads'));
+
 app.use("/category", require("./Routes/category-routes"));
 app.use("/product", require("./Routes/product-routes"));
 app.use("/customer", require("./Routes/customer-routes"));

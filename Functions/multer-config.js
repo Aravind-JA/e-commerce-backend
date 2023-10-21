@@ -15,5 +15,6 @@ const upload = multer({ storage: storage }).fields([
     { name: 'image', maxCount: 1 },
     { name: 'images', maxCount: 6 }
 ]);
+const single = multer({ storage: storage });
 
-module.exports = { upload };
+module.exports = { upload, single };

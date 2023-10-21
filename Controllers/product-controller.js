@@ -29,21 +29,35 @@ async function GetOneData(req, res) {
     }
 }
 
-
+async function GetCategoryData(req, res) {
+    try {
+        const category_id = req.params.id;
+        const filter = { category_id: category_id };
+        const data = await Product.find(filter);
+        if (!data) {
+            res.status(404).json({ message: "Products not found!!!" });
+        } else {
+            res.status(200).json(data);
+        }
+    } catch (error) {
+        res.status(400).json(error);
+    }
+}
 
 async function PostData(req, res) {
-    upload(req, res, async (err)=> {
+    upload(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             res.status(400).json({ error: "Multer Error...", err });
         } else if (err) {
             res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } });
         } else {
             try {
-               const image = req.files['image'][0].path;
+                const image = 'http://localhost:3333/' + req.files['image'][0].path;
+                //    const image = req.files['image'][0].path;
                 const files = req.files['images'];
                 let images = [];
                 for (const file of files) {
-                    images.push(file.path);
+                    images.push('http://localhost:3333/' + file.path);
                 }
                 const { name, description, price, active, admin_id, category_id } = req.body;
                 const Body = { name, description, price, image, images, active, admin_id, category_id, id: UID("PR") };
@@ -120,4 +134,4 @@ async function DeleteData(req, res) {
     }
 }
 
-module.exports = { GetData, GetOneData, PostData, PutData, DeleteData };
+module.exports = { GetData, GetOneData, GetCategoryData, PostData, PutData, DeleteData };
