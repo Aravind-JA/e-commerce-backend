@@ -32,6 +32,10 @@ async function PostCartItem(req, res) {
         const items = { product_id };
         const filter = { id: customer_id };
         const cart = await Cart.findOne(filter);
+        const itemIndex = cart.items.findIndex(item => item.product_id === product_id);
+        if (itemIndex != -1) {
+            return res.status(400).json({ message: "product already in cart..." });
+        }
         cart.items.push(items);
         const updatedCart = await cart.save();
         res.status(200).json(updatedCart);

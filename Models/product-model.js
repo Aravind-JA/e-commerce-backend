@@ -15,10 +15,15 @@ const productSchema = mongoose.Schema({
         required: true,
         index: 'text',
     },
+    specs: [String],
     price: {
         type: Number,
         required: true,
         index: true,
+    },
+    discount: {
+        type: Number,
+        required:true
     },
     image: {
         type: String,

@@ -59,8 +59,8 @@ async function PostData(req, res) {
                 for (const file of files) {
                     images.push('http://localhost:3333/' + file.path);
                 }
-                const { name, description, price, active, admin_id, category_id } = req.body;
-                const Body = { name, description, price, image, images, active, admin_id, category_id, id: UID("PR") };
+                const { name, description, price, active, admin_id, category_id, specs, discount } = req.body;
+                const Body = { name, description, specs, price, discount, image, images, active, admin_id, category_id, id: UID("PR") };
                 const data = await Product.create(Body);
                 res.status(200).json(data);
                 // res.status(200).json(Body);
@@ -96,28 +96,36 @@ async function PostData(req, res) {
 // }
 
 async function PutData(req, res) {
-    try {
-        const filter = { id: req.params.id };
-        const data = await Product.findOne(filter);
-        // const newBody = [...data, ...req.body];
-        // const result = await Product.findOneAndUpdate(filter, newBody, { new: true });
+    upload(req, res, async (err) => {
+        if (err instanceof multer.MulterError) {
+            res.status(400).json({ error: "Multer Error...", err });
+        } else if (err) {
+            res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } });
+        } else {
+            try {
+                const filter = { id: req.params.id };
+                const data = await Product.findOne(filter);
+                // const newBody = [...data, ...req.body];
+                // const result = await Product.findOneAndUpdate(filter, newBody, { new: true });
 
 
-        if (!data) {
-            return res.status(404).json({ message: "Product not found!!!" });
-        }
+                if (!data) {
+                    return res.status(404).json({ message: "Product not found!!!" });
+                }
 
-        for (const key in req.body) {
-            if (key in data) {
-                data[key] = req.body[key];
+                for (const key in req.body) {
+                    if (key in data) {
+                        data[key] = req.body[key];
+                    }
+                }
+                const updatedData = await data.save();
+                res.status(201).json({ message: "Successfully updated...", updatedData });
+
+            } catch (error) {
+                res.status(400).json(error);
             }
         }
-        const updatedData = await data.save();
-        res.status(201).json({ message: "Successfully updated...", updatedData });
-
-    } catch (error) {
-        res.status(400).json(error);
-    }
+    });
 }
 
 async function DeleteData(req, res) {

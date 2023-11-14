@@ -1,11 +1,14 @@
-const  Order  = require('../Models/order-model');
+const Order = require('../Models/order-model');
 const UID = require('../Functions/uid');
+const { PostCart, DeleteCart } = require('./cart-controller');
 
 async function PostData(req, res) {
     try {
-        const { customer_id, order_date, quantity, items, total_price } = req.body;
-        const Body = { customer_id, order_date, quantity, items, total_price, id: UID('OD') };
+        const { customer_id, order_date, items, total_price } = req.body;
+        const Body = { customer_id, order_date, items, total_price, id: UID('OD') };
         const order = await Order.create(Body);
+        await DeleteCart(customer_id);
+        await PostCart(customer_id);
         res.status(201).json(order);
     } catch (error) {
         res.status(400).json(error);

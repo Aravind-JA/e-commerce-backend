@@ -2,23 +2,59 @@ const Customer = require('../Models/customer-model');
 const { PostCart, DeleteCart } = require('./cart-controller');
 const UID = require('../Functions/uid');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 async function PostData(req, res) {
     const { firstName, lastName, password, email, phone, address, district, state } = req.body;
     try {
         if (firstName && lastName && password && email && phone && address && district && state) {
+
+            const existingUser = await Customer.findOne({ $or: [{ phone }, { email }] });
+
+            if (existingUser) {
+                return res.status(409).json({ message: "User with the same email already exists." });
+            }
+
             const hash = await bcrypt.hash(password, 10);
-            const Body = {
-                firstName,lastName, password:hash, email, phone,address,district,state, id: UID("CS")
-            };
+
+            const Body = { firstName, lastName, password: hash, email, phone, address, district, state, id: UID("CS") };
+
             const data = await Customer.create(Body);
+
             await PostCart(Body.id);
             res.status(200).json(data);
         } else {
-            res.status(404).json({ message: "All fields are mandatory..."});
+            res.status(404).json({ message: "All fields are mandatory..." });
         }
     } catch (error) {
-        res.status(400).json({error,message:"error"});
+        res.status(400).json({ error, message: "error" });
+    }
+}
+
+async function Login(req, res) {
+    const { email, password } = req.body;
+    try {
+        if (!email || !password) {
+            return res.status(400).json({ message: "Both email and password are required." });
+        }
+
+        const user = await Customer.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ message: "Authentication failed. User not found." });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Authentication failed. Password is incorrect." });
+        }
+
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.Customer_Key);
+        res.status(200).json({ token, id: user.id });
+    } catch (error) {
+        console.error("Error during login:", error);
+        res.status(500).json({ message: "Login failed." });
     }
 }
 
@@ -77,4 +113,4 @@ async function DeleteData(req, res) {
     }
 }
 
-module.exports = { PostData,GetData, GetOneData, PutData, DeleteData };
+module.exports = { PostData, Login, GetData, GetOneData, PutData, DeleteData };

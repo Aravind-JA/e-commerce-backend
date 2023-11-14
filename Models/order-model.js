@@ -13,10 +13,6 @@ orderSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    quantity: {
-        type: Number,
-        required: true
-    },
     items: [
         {
             product_id: {
@@ -25,6 +21,10 @@ orderSchema = mongoose.Schema({
             },
             admin_id: {
                 type: String,
+                required: true
+            },
+            quantity: {
+                type: Number,
                 required: true
             }
         }
