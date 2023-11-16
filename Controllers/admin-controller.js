@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 async function Register(req, res) {
-    console.log(req.body);
     const { userName, password, email, phone } = req.body;
 
     try {
@@ -58,7 +57,7 @@ async function Login(req, res) {
         // If the username and password match, create a JWT token and send it to the client
         const token = jwt.sign({ id: admin.id, userName: admin.userName }, process.env.Admin_Key);
 
-        res.status(200).json({ token });
+        res.status(200).json({ token, id: admin.id });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ message: "Login failed." });
