@@ -44,7 +44,25 @@ async function GetCategoryData(req, res) {
     }
 }
 
+async function GetAdminProducts(req, res) {
+    try {
+        const admin_id = req.params.id;
+        const filter = { admin_id: admin_id };
+        const data = await Product.find(filter);
+        if (!data) {
+            return res.status(404).json({ message: "Products not found!!!" });
+        } else {
+            return res.status(200).json(data);
+        }
+    } catch (error) {
+        res.status(400).json(error);
+    }
+}
+
 async function PostData(req, res) {
+    if (req.body == {}) {
+        return res.status(400).json({ message: "All fields are mandatory." });
+    }
     upload(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             res.status(400).json({ error: "Multer Error...", err });
@@ -142,4 +160,4 @@ async function DeleteData(req, res) {
     }
 }
 
-module.exports = { GetData, GetOneData, GetCategoryData, PostData, PutData, DeleteData };
+module.exports = { GetData, GetOneData, GetCategoryData,GetAdminProducts, PostData, PutData, DeleteData };
