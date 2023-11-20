@@ -1,6 +1,7 @@
 const UID = require('../Functions/uid');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const Product = require('../Models/product-model');
 const { upload } = require('../Functions/multer-config');
 
@@ -60,9 +61,6 @@ async function GetAdminProducts(req, res) {
 }
 
 async function PostData(req, res) {
-    if (req.body == {}) {
-        return res.status(400).json({ message: "All fields are mandatory." });
-    }
     upload(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             res.status(400).json({ error: "Multer Error...", err });
@@ -83,7 +81,7 @@ async function PostData(req, res) {
                 res.status(200).json(data);
                 // res.status(200).json(Body);
             } catch (error) {
-                res.status(400).json(error);
+                res.status(400).json({ message: "error occured", error: error });
             }
         }
     });
@@ -149,6 +147,12 @@ async function PutData(req, res) {
 async function DeleteData(req, res) {
     try {
         const filter = { id: req.params.id };
+        const product = await Product.findOne(filter);
+        deleteImage(product.image);
+        product.images.forEach(image => {
+            console.log(image);
+            deleteImage(image);
+        });
         const data = await Product.findOneAndDelete(filter);
         if (!data) {
             res.status(404).json({ message: "Product not found!!!" });
@@ -160,4 +164,17 @@ async function DeleteData(req, res) {
     }
 }
 
-module.exports = { GetData, GetOneData, GetCategoryData,GetAdminProducts, PostData, PutData, DeleteData };
+function deleteImage(image) {
+    const imagePath = image.replace('http://localhost:3333/uploads\\', '/uploads/');
+    const pathsegments = __dirname.split('\\');
+    const dirname = pathsegments.slice(0, -1).join('/');
+    const absolutePath = path.join(dirname, imagePath);
+    console.log(absolutePath);
+    if (fs.existsSync(absolutePath)) {
+        fs.unlinkSync(absolutePath);
+    } else {
+        console.log(`File ${imagePath} does not exist.`);
+    }
+}
+
+module.exports = { GetData, GetOneData, GetCategoryData, GetAdminProducts, PostData, PutData, DeleteData };

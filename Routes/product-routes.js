@@ -5,6 +5,6 @@ router.route("/").get(GetData);
 router.route("/").post(verifyAdminToken, PostData);
 router.route("/category/:id").get(GetCategoryData);
 router.route("/admin/:id").get(GetAdminProducts);
-router.route("/:id").get(GetOneData).put(PutData).delete(DeleteData);
+router.route("/:id").get(GetOneData).put(verifyAdminToken, PutData).delete(verifyAdminToken, DeleteData);
 
 module.exports = router;
